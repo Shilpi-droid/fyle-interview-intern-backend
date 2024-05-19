@@ -29,17 +29,18 @@ def grade_assignment(p, incoming_payload):
     """Grade or re-grade an assignment"""
     try:
         grade_assignment_payload = AssignmentGradeSchema().load(incoming_payload)
-        assignment_id = grade_assignment_payload['id']
+        assignment_id = grade_assignment_payload.id
 
         # Check the state of the assignment
         assignment = Assignment.get_by_id(assignment_id)
+        
         if assignment.state == AssignmentStateEnum.DRAFT:
             return jsonify({'error': 'Bad Request', 'message': 'Assignment is in Draft state and cannot be graded'}), 400
 
         # Grade the assignment
         graded_assignment = Assignment.mark_grade(
             _id=assignment_id,
-            grade=grade_assignment_payload['grade'],
+            grade=grade_assignment_payload.grade,
             auth_principal=p
         )
         db.session.commit()
