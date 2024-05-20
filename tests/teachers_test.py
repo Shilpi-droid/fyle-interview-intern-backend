@@ -107,7 +107,7 @@ def test_grade_assignment_draft_assignment(client, h_teacher_1):
 
 
 
-
+#----------------------new tests-----------------------------------------
 
 
 def test_list_teachers_with_data(client, h_principal):
@@ -146,3 +146,71 @@ def test_list_teachers_missing_auth(client):
 
     # Check the response status code
     assert response.status_code == 401
+
+
+#---------------------------------------------------------------------------------
+
+import json
+
+# def test_list_assignments_with_data(client, h_principal):
+#     """
+#     Test listing assignments when assignments exist for the teacher.
+#     """
+#     # Create assignments associated with the teacher (if needed)
+#     # Make the request to list assignments
+#     response = client.get('/teacher/assignments', headers=h_principal)
+
+#     # Check the response status code
+#     assert response.status_code == 200
+
+#     # Check that the response contains the correct structure with data
+#     data = response.json
+#     assert 'data' in data
+#     assert isinstance(data['data'], list)
+#     # Add more assertions to validate the data structure and content
+
+
+# def test_list_assignments_empty(client, h_principal):
+#     """
+#     Test listing assignments when no assignments exist for the teacher.
+#     """
+#     # Ensure that there are no assignments associated with the teacher
+#     # Make the request to list assignments
+#     response = client.get('/teacher/assignments', headers=h_principal)
+
+#     # Check the response status code
+#     assert response.status_code == 200
+
+#     # Check that the response contains an empty list of assignments
+#     data = response.json
+#     assert 'data' in data
+#     assert isinstance(data['data'], list)
+#     assert len(data['data']) == 0
+#     # Add more assertions if needed
+
+
+# def test_grade_assignment_successful(client, h_teacher_1):
+#     """
+#     Test grading a valid assignment successfully.
+#     """
+#     # Create a mock assignment associated with the teacher
+#     # Make the request to grade the assignment
+#     response = client.post(
+#         '/teacher/assignments/grade',
+#         headers=h_teacher_1,
+#         json={'id': 1, 'grade': 'A'}
+#     )
+
+#     # Check the response status code
+#     assert response.status_code == 200
+
+#     # Check that the response contains the graded assignment data
+#     data = response.json
+#     assert 'data' in data
+#     # Add more assertions if needed
+
+
+# Add more test functions to cover various error scenarios for grade_assignment route
+
+
+

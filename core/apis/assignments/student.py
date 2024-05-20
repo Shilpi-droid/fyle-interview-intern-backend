@@ -2,7 +2,7 @@ from flask import Blueprint,jsonify
 from core import db
 from core.apis import decorators
 from core.apis.responses import APIResponse
-from core.models.assignments import Assignment
+from core.models.assignments import Assignment,AssignmentStateEnum
 
 from .schema import AssignmentSchema, AssignmentSubmitSchema
 student_assignments_resources = Blueprint('student_assignments_resources', __name__)
@@ -35,29 +35,6 @@ def upsert_assignment(p, incoming_payload):
     return APIResponse.respond(data=upserted_assignment_dump)
 
 
-@student_assignments_resources.route('/assignments/submit', methods=['POST'], strict_slashes=False)
-@decorators.accept_payload
-@decorators.authenticate_principal
-def submit_assignment(p, incoming_payload):
-    """Submit an assignment"""
-    try:
-        submit_assignment_payload = AssignmentSubmitSchema().load(incoming_payload)
-
-        submitted_assignment = Assignment.submit(
-            _id=submit_assignment_payload.id,
-            teacher_id=submit_assignment_payload.teacher_id,
-            auth_principal=p
-        )
-        db.session.commit()  # Commit the session after making changes
-        submitted_assignment_dump = AssignmentSchema().dump(submitted_assignment)
-        return APIResponse.respond(data=submitted_assignment_dump)
-    except Exception as e:
-        db.session.rollback()
-        # logging.exception("An error occurred while submitting the assignment")
-        return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
-
-
-
 # @student_assignments_resources.route('/assignments/submit', methods=['POST'], strict_slashes=False)
 # @decorators.accept_payload
 # @decorators.authenticate_principal
@@ -65,17 +42,7 @@ def submit_assignment(p, incoming_payload):
 #     """Submit an assignment"""
 #     try:
 #         submit_assignment_payload = AssignmentSubmitSchema().load(incoming_payload)
-        
-#         # Check if the assignment is already submitted or not in a draft state
-#         assignment = Assignment.query.filter_by(id=submit_assignment_payload.id).first()
-#         if assignment is None:
-#             return jsonify({'error': 'FyleError', 'message': 'No assignment with this id was found'}), 400
-#         if assignment.teacher_id == submit_assignment_payload.teacher_id:
-#             return jsonify({'error': 'FyleError', 'message': 'This assignment has already been submitted to this teacher'}), 400
-#         if assignment.state != 'DRAFT':
-#             return jsonify({'error': 'FyleError', 'message': 'Only a draft assignment can be submitted'}), 400
 
-#         # Call the submit method if no existing assignment is found
 #         submitted_assignment = Assignment.submit(
 #             _id=submit_assignment_payload.id,
 #             teacher_id=submit_assignment_payload.teacher_id,
@@ -84,8 +51,34 @@ def submit_assignment(p, incoming_payload):
 #         db.session.commit()  # Commit the session after making changes
 #         submitted_assignment_dump = AssignmentSchema().dump(submitted_assignment)
 #         return APIResponse.respond(data=submitted_assignment_dump)
-#     except AssertionError as e:
-#         return jsonify({'error': 'FyleError', 'message': str(e)}), 400
 #     except Exception as e:
 #         db.session.rollback()
+#         # logging.exception("An error occurred while submitting the assignment")
 #         return jsonify({'error': 'Internal Server Error', 'message': str(e)}), 500
+
+@student_assignments_resources.route('/assignments/submit', methods=['POST'], strict_slashes=False)
+@decorators.accept_payload
+@decorators.authenticate_principal
+def submit_assignment(p, incoming_payload):
+    """Submit an assignment"""
+    submit_assignment_payload = AssignmentSubmitSchema().load(incoming_payload)
+
+    assignment = Assignment.get_by_id(submit_assignment_payload.id)
+    if not assignment:
+        return APIResponse.respond_error(message='No assignment found with the given ID', status_code=404)
+
+    if assignment.student_id != p.student_id:
+        return APIResponse.respond_error(message='This assignment does not belong to the current student', status_code=403)
+
+    if assignment.content is None:
+        return APIResponse.respond_error(message='Assignment content cannot be empty', status_code=400)
+
+    if assignment.state != AssignmentStateEnum.DRAFT:
+        return APIResponse.respond_error_with_details(message='only a draft assignment can be submitted', status_code=400, error='FyleError')    
+
+    assignment.state = AssignmentStateEnum.SUBMITTED
+    assignment.teacher_id = submit_assignment_payload.teacher_id
+    db.session.commit()
+
+    submitted_assignment_dump = AssignmentSchema().dump(assignment)
+    return APIResponse.respond(data=submitted_assignment_dump)

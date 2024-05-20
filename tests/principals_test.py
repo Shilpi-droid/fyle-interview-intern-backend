@@ -1,4 +1,4 @@
-from core.models.assignments import AssignmentStateEnum, GradeEnum
+from core.models.assignments import Assignment,AssignmentStateEnum, GradeEnum
 from core import db
 
 def test_get_assignments(client, h_principal):
@@ -15,21 +15,23 @@ def test_get_assignments(client, h_principal):
 
 
 
-# def test_grade_assignment_draft_assignment(client, h_principal):
-#     """
-#     failure case: If an assignment is in Draft state, it cannot be graded by principal
-#     """
-#     response = client.post(
-#         '/principal/assignments/grade',
-#         json={
-#             'id': 4,
-#             'grade': GradeEnum.A.value
-#         },
-#         headers=h_principal
-#     )
+def test_grade_assignment_draft_assignment(client, h_principal):
+    """
+    failure case: If an assignment is in Draft state, it cannot be graded by principal
+    """
+    assignment = Assignment.query.get(4)
+    assignment.state = AssignmentStateEnum.DRAFT
+    response = client.post(
+        '/principal/assignments/grade',
+        json={
+            'id': 4,
+            'grade': GradeEnum.A.value
+        },
+        headers=h_principal
+    )
 
-#     assert response.status_code == 400
-#     db.session.rollback()
+    assert response.status_code == 400
+    db.session.rollback()
 
 
 def test_grade_assignment(client, h_principal):
