@@ -32,21 +32,5 @@ def grade_assignment(p, incoming_payload):
         return jsonify({'error': 'FyleError', 'message': 'No assignment with this id was found'}), 404
     if assignment.teacher_id != p.teacher_id:
         return jsonify({'error': 'FyleError', 'message': 'You are not authorized to grade this assignment'}), 400
-    if assignment.state != AssignmentStateEnum.SUBMITTED:
-        return jsonify({'error': 'FyleError', 'message': 'Only a submitted assignment can be graded'}), 400
     
-    # Add additional check for valid grade
-    if grade_assignment_payload.grade not in ['A', 'B', 'C', 'D', 'F']:
-        return jsonify({'error': 'ValidationError', 'message': 'Invalid grade provided'}), 400
-
-    try:
-        graded_assignment = Assignment.mark_grade(
-            _id=grade_assignment_payload.id,
-            grade=grade_assignment_payload.grade,
-            auth_principal=p
-        )
-        db.session.commit()
-        graded_assignment_dump = AssignmentSchema().dump(graded_assignment)
-        return jsonify({'data': graded_assignment_dump}), 200
-    except ValueError as e:
-        return jsonify({'error': 'FyleError', 'message': str(e)}), 400
+    

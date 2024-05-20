@@ -152,23 +152,6 @@ def test_list_teachers_missing_auth(client):
 
 import json
 
-# def test_list_assignments_with_data(client, h_principal):
-#     """
-#     Test listing assignments when assignments exist for the teacher.
-#     """
-#     # Create assignments associated with the teacher (if needed)
-#     # Make the request to list assignments
-#     response = client.get('/teacher/assignments', headers=h_principal)
-
-#     # Check the response status code
-#     assert response.status_code == 200
-
-#     # Check that the response contains the correct structure with data
-#     data = response.json
-#     assert 'data' in data
-#     assert isinstance(data['data'], list)
-#     # Add more assertions to validate the data structure and content
-
 
 # def test_list_assignments_empty(client, h_principal):
 #     """
