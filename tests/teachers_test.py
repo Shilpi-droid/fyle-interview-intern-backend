@@ -104,3 +104,45 @@ def test_grade_assignment_draft_assignment(client, h_teacher_1):
 
     assert data['error'] == 'FyleError'
     db.session.rollback()
+
+
+
+
+
+
+def test_list_teachers_with_data(client, h_principal):
+    """
+    Test listing teachers when there are teachers in the system.
+    """
+    # Make the request to list teachers
+    response = client.get('/principal_teacher/teachers', headers=h_principal)
+
+    # Check the response status code
+    assert response.status_code == 200
+
+    # Check that the response contains the correct structure with data
+    assert 'data' in response.json
+    assert isinstance(response.json['data'], list)
+    assert len(response.json['data']) == 2
+    assert response.json['data'][0]['id'] == 1
+    assert response.json['data'][1]['id'] == 2
+
+def test_list_teachers_invalid_auth(client):
+    """
+    Test listing teachers with invalid authentication.
+    """
+    # Make the request to list teachers without authentication token
+    response = client.get('/principal_teacher/teachers')
+
+    # Check the response status code
+    assert response.status_code == 401
+
+def test_list_teachers_missing_auth(client):
+    """
+    Test listing teachers with missing authentication token.
+    """
+    # Make the request to list teachers with missing authentication token
+    response = client.get('/principal_teacher/teachers')
+
+    # Check the response status code
+    assert response.status_code == 401
