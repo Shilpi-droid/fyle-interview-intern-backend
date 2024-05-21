@@ -71,7 +71,7 @@ Following are the steps to run the application with Docker
 ### Clone the Repository
 
 ```
-git clone https://github.com/amitkumar590/fyle-interview-intern-backend
+git clone https://github.com/Shilpi-droid/fyle-interview-intern-backend
 cd fyle-interview-intern-backend
 ```
 
